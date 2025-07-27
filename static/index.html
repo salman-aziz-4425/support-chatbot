@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Support Chatbot</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="chat-container">
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <div class="agent-info">
+                <div class="agent-avatar">
+                    <i class="fas fa-robot" id="agent-icon"></i>
+                </div>
+                <div class="agent-details">
+                    <h3 id="agent-name">AI Assistant</h3>
+                    <span class="status" id="agent-status">Online</span>
+                </div>
+            </div>
+            <div class="chat-actions">
+                <button class="btn-minimize" title="Minimize">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="btn-close" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot-message">
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <p>Hello! I'm your AI support assistant. How can I help you today?</p>
+                    <span class="message-time">Just now</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-indicator" id="typingIndicator" style="display: none;">
+            <div class="message-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <!-- Transfer to Human Notice -->
+        <div class="transfer-notice" id="transferNotice" style="display: none;">
+            <div class="notice-content">
+                <i class="fas fa-user-headset"></i>
+                <p>Connecting you to a human agent...</p>
+                <div class="queue-position">
+                    <span>Position in queue: <strong id="queuePosition">1</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="chat-input-container">
+            <div class="quick-actions">
+                <button class="quick-btn" data-message="I need help with billing">
+                    <i class="fas fa-credit-card"></i>
+                    Billing
+                </button>
+                <button class="quick-btn" data-message="I have a technical issue">
+                    <i class="fas fa-cog"></i>
+                    Technical
+                </button>
+                <button class="quick-btn" data-message="I want to speak to a human">
+                    <i class="fas fa-user"></i>
+                    Human Agent
+                </button>
+            </div>
+
+            <div class="input-wrapper">
+                <input type="text" id="messageInput" placeholder="Type your message..." maxlength="500"
+                    autocomplete="off">
+                <button id="sendButton" class="send-btn" type="button">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <div class="input-footer">
+                <span class="char-counter">
+                    <span id="charCount">0</span>/500
+                </span>
+                <span class="powered-by">
+                    Powered by AI
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="connection-status" id="connectionStatus">
+        <i class="fas fa-wifi"></i>
+        <span>Connected</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+
+</html>

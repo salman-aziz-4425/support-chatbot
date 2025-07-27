@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Agent Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .login-section {
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .chat-area {
+            display: none;
+            padding: 20px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .status {
+            padding: 10px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #166534;
+        }
+        
+        .messages {
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            background: #f8fafc;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .customer-message {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .agent-message {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            resize: none;
+        }
+        
+        .send-btn {
+            padding: 12px 20px;
+            background: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .transfer-controls {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .transfer-controls h4 {
+            margin-bottom: 10px;
+            color: #374151;
+        }
+        
+        .transfer-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .transfer-btn {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .transfer-btn:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        
+        #transferMessage {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>🎧 Support Agent Dashboard</h1>
+            <div id="agentInfo" class="hidden">
+                <span id="agentName">Agent</span> - 
+                <span id="status">Online</span>
+            </div>
+        </div>
+        
+        <div id="loginSection" class="login-section">
+            <h2>Agent Login</h2>
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" placeholder="Enter your username">
+                </div>
+                <div class="form-group">
+                    <label for="agentType">Department:</label>
+                    <select id="agentType">
+                        <option value="support">General Support</option>
+                        <option value="technical">Technical Support</option>
+                        <option value="billing">Billing Support</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="login()">Login</button>
+            </div>
+        </div>
+        
+        <div id="chatArea" class="chat-area hidden">
+            <div id="statusMessage" class="status">
+                Waiting for customer assignments...
+            </div>
+            <div id="messages" class="messages">
+                <p>No active chats. Waiting for customers...</p>
+            </div>
+            
+            <!-- Transfer Controls -->
+            <div id="transferControls" class="transfer-controls hidden">
+                <h4>Transfer to AI Agent:</h4>
+                <div class="transfer-buttons">
+                    <button class="transfer-btn" onclick="transferToAI('transfer_to_triage')">
+                        🎯 Triage
+                    </button>
+                    <button class="transfer-btn" onclick="transferToAI('transfer_to_technical')">
+                        🔧 Technical
+                    </button>
+                    <button class="transfer-btn" onclick="transferToAI('transfer_to_billing')">
+                        💳 Billing
+                    </button>
+                    <button class="transfer-btn" onclick="transferToAI('transfer_to_sales')">
+                        🛒 Sales
+                    </button>
+                </div>
+                <textarea id="transferMessage" placeholder="Optional transfer note..." rows="2"></textarea>
+            </div>
+            
+            <div class="input-area">
+                <textarea id="messageInput" class="message-input" placeholder="Type your response to the customer..." rows="3"></textarea>
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let websocket = null;
+        let currentSessionId = null;
+        let agentId = null;
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const agentType = document.getElementById('agentType').value;
+            
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/agent/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        agent_type: agentType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    agentId = data.agent_id;
+                    console.log('Agent login successful, agentId:', agentId);
+                    document.getElementById('agentName').textContent = username;
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('chatArea').classList.remove('hidden');
+                    document.getElementById('agentInfo').classList.remove('hidden');
+                    
+                    connectWebSocket();
+                } else {
+                    alert('Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed');
+            }
+        }
+        
+        function connectWebSocket() {
+            const wsUrl = `ws://localhost:8000/ws/agent/${agentId}`;
+            console.log('Connecting to WebSocket:', wsUrl);
+            
+            websocket = new WebSocket(wsUrl);
+            
+            websocket.onopen = () => {
+                console.log('Agent WebSocket connection opened');
+                updateStatus('Connecting...');
+            };
+            
+            websocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log('Received WebSocket message:', data);
+                handleMessage(data);
+            };
+            
+            websocket.onclose = (event) => {
+                console.log('Agent WebSocket disconnected. Code:', event.code, 'Reason:', event.reason);
+                updateStatus('Disconnected - Attempting to reconnect...');
+                setTimeout(connectWebSocket, 3000);
+            };
+            
+            websocket.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                updateStatus('Connection error - Check console for details');
+            };
+        }
+        
+        function handleMessage(data) {
+            console.log('Agent received message:', data);
+            
+            if (data.type === 'connection_confirmed') {
+                console.log('Connection confirmed:', data.message);
+                updateStatus('Connected - Waiting for assignments');
+                
+            } else if (data.type === 'new_assignment') {
+                currentSessionId = data.customer_id;
+                updateStatus(`Assigned to customer: ${data.customer_id}`);
+                
+                // Show transfer controls
+                document.getElementById('transferControls').classList.remove('hidden');
+                
+                // Clear previous messages and show assignment
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = '<p><strong>New customer assignment:</strong></p>';
+                
+                // Show conversation history if available
+                if (data.conversation_history && data.conversation_history.length > 0) {
+                    addMessage('system', 'Previous conversation:');
+                    data.conversation_history.forEach(msg => {
+                        if (msg.source === 'user') {
+                            addMessage('customer', msg.content, msg.timestamp);
+                        } else if (msg.source === 'AI_Support') {
+                            addMessage('system', `AI: ${msg.content}`, msg.timestamp);
+                        }
+                    });
+                }
+                
+                // Show the current message
+                addMessage('customer', data.initial_message, data.timestamp);
+                addMessage('system', 'Customer has been assigned to you. Please respond to assist them.');
+                
+            } else if (data.type === 'customer_message') {
+                // Show customer message
+                addMessage('customer', data.message, data.timestamp);
+                
+                // Set session ID if not already set
+                if (!currentSessionId) {
+                    currentSessionId = data.customer_id;
+                    updateStatus(`Handling customer: ${data.customer_id}`);
+                    // Show transfer controls
+                    document.getElementById('transferControls').classList.remove('hidden');
+                }
+            } else if (data.type === 'transfer_confirmation') {
+                if (data.success) {
+                    addMessage('system', `Successfully transferred customer to ${data.target_agent.replace('transfer_to_', '').replace('_', ' ')} AI agent.`);
+                    // Hide transfer controls and clear session
+                    document.getElementById('transferControls').classList.add('hidden');
+                    currentSessionId = null;
+                    updateStatus('Connected - Waiting for assignments');
+                } else {
+                    addMessage('system', 'Transfer failed. Please try again.');
+                }
+            } else {
+                console.log('Unknown message type:', data.type);
+            }
+        }
+        
+        function addMessage(type, content, timestamp = null) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            
+            const time = timestamp ? new Date(timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
+            messageDiv.innerHTML = `
+                <strong>${type === 'customer' ? 'Customer' : type === 'agent' ? 'You' : 'System'}:</strong> ${content}
+                <small style="float: right; opacity: 0.7;">${time}</small>
+            `;
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function displayHistory(history) {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '<p><strong>Previous conversation:</strong></p>';
+            
+            history.forEach(msg => {
+                if (msg.type === 'TextMessage') {
+                    const sender = msg.source === 'user' ? 'customer' : 'agent';
+                    addMessage(sender, msg.content, msg.timestamp);
+                }
+            });
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || !websocket || !currentSessionId) {
+                return;
+            }
+            
+            websocket.send(JSON.stringify({
+                type: 'agent_message',
+                customer_id: currentSessionId,
+                message: message
+            }));
+            
+            addMessage('agent', message);
+            input.value = '';
+        }
+        
+        function updateStatus(message) {
+            document.getElementById('statusMessage').textContent = message;
+        }
+        
+        function transferToAI(transferCommand) {
+            if (!websocket || !currentSessionId) {
+                alert('No active customer session to transfer');
+                return;
+            }
+            
+            const transferMessage = document.getElementById('transferMessage').value.trim();
+            
+            websocket.send(JSON.stringify({
+                type: 'transfer_to_ai',
+                customer_id: currentSessionId,
+                transfer_command: transferCommand,
+                transfer_message: transferMessage
+            }));
+            
+            addMessage('system', `Initiating transfer to ${transferCommand.replace('transfer_to_', '').replace('_', ' ')} AI agent...`);
+            
+            // Clear transfer message
+            document.getElementById('transferMessage').value = '';
+        }
+        
+        // Send message on Enter key
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('messageInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
