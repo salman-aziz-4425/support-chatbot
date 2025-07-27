@@ -6,6 +6,7 @@ pydantic==2.11.7
 anthropic==0.59.0
 autogen-agentchat==0.6.4
 autogen-core==0.6.4
+autogen-ext==0.6.4
 pyautogen==0.10.0
 python-dotenv==1.0.0
 aiofiles==23.2.1

@@ -28,6 +28,8 @@ logger = logging.getLogger(__name__)
 
 agent_runtime = None
 
+
+
 async def initialize_agent_runtime():
     """Initialize the handoff pattern agent runtime"""
     global agent_runtime

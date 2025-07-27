@@ -41,4 +41,7 @@ class ConnectionManager:
         return available
     
     def assign_human_agent(self, customer_id: str, agent_id: str):
-        self.customer_to_agent[customer_id] = agent_id 
+        self.customer_to_agent[customer_id] = agent_id
+
+# Create global manager instance
+manager = ConnectionManager() 

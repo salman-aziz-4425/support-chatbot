@@ -6,12 +6,12 @@ from autogen_core import (
     MessageContext,
     message_handler,
     TopicId,
-    TypeSubscription
+    TypeSubscription,
+    FunctionCall
 )
 from autogen_core.models import (
     AssistantMessage,
     ChatCompletionClient,
-    FunctionCall,
     FunctionExecutionResult,
     FunctionExecutionResultMessage,
     LLMMessage,
