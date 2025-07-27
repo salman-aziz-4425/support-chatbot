@@ -113,23 +113,26 @@ class WebSocketHumanAgent(RoutedAgent):
                     'source': 'system',
                     'timestamp': datetime.now().isoformat()
                 })
-        
-        latest_message = "Customer needs assistance"
-        if message.context:
-            for msg in reversed(message.context):
-                if isinstance(msg, UserMessage):
-                    latest_message = str(msg.content) if msg.content else "Customer needs assistance"
-                    break
+        has_user_messages = any(msg.get('source') == 'user' for msg in conversation_history)
         
         try:
             assignment_data = {
                 "type": "new_assignment",
                 "customer_id": customer_id,
-                "initial_message": latest_message,
                 "conversation_history": conversation_history,
                 "timestamp": datetime.now().isoformat(),
                 "task_type": "human_escalation"
             }
+            
+            # Only add initial_message if there are no user messages in conversation history
+            if not has_user_messages:
+                latest_message = "Customer needs assistance"
+                if message.context:
+                    for msg in reversed(message.context):
+                        if isinstance(msg, UserMessage):
+                            latest_message = str(msg.content) if msg.content else "Customer needs assistance"
+                            break
+                assignment_data["initial_message"] = latest_message
             
             try:
                 import json

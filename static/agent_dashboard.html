@@ -359,6 +359,8 @@
                 messagesDiv.innerHTML = '<p><strong>New customer assignment:</strong></p>';
                 
                 // Show conversation history if available
+                console.log("data.conversation_history")
+                console.log(data.conversation_history)
                 if (data.conversation_history && data.conversation_history.length > 0) {
                     addMessage('system', 'Previous conversation:');
                     data.conversation_history.forEach(msg => {
@@ -369,9 +371,9 @@
                         }
                     });
                 }
-                
-                // Show the current message
-                addMessage('customer', data.initial_message, data.timestamp);
+                if (data.initial_message) {
+                    addMessage('customer', data.initial_message, data.timestamp);
+                }
                 addMessage('system', 'Customer has been assigned to you. Please respond to assist them.');
                 
             } else if (data.type === 'customer_message') {

@@ -36,18 +36,20 @@ def setup_websockets(app):
             while True:
                 data = await websocket.receive_json()
                 user_message = data.get("content", "")
-                
+                print("received data")
+                print(user_message)
                 if not user_message.strip():
                     continue  # Skip empty messages
                 
                 try:
                     conversation_history = manager.customer_conversations.get(customer_id, [])
-                    conversation_history.append({
-                        "content": user_message,
-                        "source": "user", 
-                        "timestamp": datetime.now().isoformat()
-                    })
-                    manager.customer_conversations[customer_id] = conversation_history
+                    if not conversation_history or conversation_history[-1].get('content') != user_message:
+                        conversation_history.append({
+                            "content": user_message,
+                            "source": "user", 
+                            "timestamp": datetime.now().isoformat()
+                        })
+                        manager.customer_conversations[customer_id] = conversation_history
                     
                     # Check if already assigned to human agent
                     if customer_id in manager.customer_to_agent:
@@ -70,7 +72,9 @@ def setup_websockets(app):
                         elif msg.get('source', '').endswith('_AI'):
                             context.append(AssistantMessage(content=msg['content'], source=msg.get('agent_type', 'Assistant')))
                     
-                    context.append(UserMessage(content=user_message, source="User"))
+                    # Add current message only if it's not already in the conversation history
+                    if not conversation_history or conversation_history[-1].get('content') != user_message:
+                        context.append(UserMessage(content=user_message, source="User"))
                     
                     # Send to AI agent system
                     from src.services.agent_runtime import agent_runtime as runtime
@@ -97,13 +101,11 @@ def setup_websockets(app):
 
     @app.websocket("/ws/agent/{agent_id}")
     async def agent_websocket(websocket: WebSocket, agent_id: str):
-        # Connect human agent using improved connection manager
         connection_success = await manager.connect_human_agent(agent_id, websocket)
         if not connection_success:
-            return  # Connection was rejected due to duplicate
+            return
             
         try:
-            # Send connection confirmation only once
             await websocket.send_json({
                 "type": "connection_confirmed",
                 "agent_id": agent_id,
@@ -119,7 +121,7 @@ def setup_websockets(app):
                     message = data.get("message", "")
                     
                     if not message.strip():
-                        continue  # Skip empty messages
+                        continue 
                     
                     try:
                         context = []
