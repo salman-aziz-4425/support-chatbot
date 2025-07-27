@@ -377,14 +377,10 @@
                 addMessage('system', 'Customer has been assigned to you. Please respond to assist them.');
                 
             } else if (data.type === 'customer_message') {
-                // Show customer message
                 addMessage('customer', data.message, data.timestamp);
-                
-                // Set session ID if not already set
                 if (!currentSessionId) {
                     currentSessionId = data.customer_id;
                     updateStatus(`Handling customer: ${data.customer_id}`);
-                    // Show transfer controls
                     document.getElementById('transferControls').classList.remove('hidden');
                 }
             } else if (data.type === 'transfer_confirmation') {

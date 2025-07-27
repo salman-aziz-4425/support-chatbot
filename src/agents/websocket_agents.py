@@ -68,51 +68,7 @@ class WebSocketHumanAgent(RoutedAgent):
         manager.assign_human_agent(customer_id, agent_id)
         agent_ws = manager.active_human_agents[agent_id]
         
-        conversation_history = []
-        for msg in message.context[-10:]:
-            try:
-                if isinstance(msg, UserMessage):
-                    conversation_history.append({
-                        'content': str(msg.content) if msg.content else "User message",
-                        'source': 'user',
-                        'timestamp': datetime.now().isoformat()
-                    })
-                elif isinstance(msg, AssistantMessage):
-                    content = safe_serialize_content(msg.content)
-                    try:
-                        import json
-                        json.dumps(content)
-                    except (TypeError, ValueError):
-                        content = f"Agent response (content type: {type(msg.content).__name__})"
-                        
-                    conversation_history.append({
-                        'content': content,
-                        'source': str(msg.source) if msg.source else 'assistant',
-                        'timestamp': datetime.now().isoformat()
-                    })
-                elif hasattr(msg, '__class__') and 'FunctionExecutionResultMessage' in str(type(msg)):
-                    if hasattr(msg, 'content') and msg.content:
-                        results = []
-                        for result in msg.content:
-                            if hasattr(result, 'content'):
-                                results.append(f"Function result: {result.content}")
-                        content = "; ".join(results) if results else "Function execution completed"
-                    else:
-                        content = "Function execution completed"
-                    
-                    conversation_history.append({
-                        'content': content,
-                        'source': 'system',
-                        'timestamp': datetime.now().isoformat()
-                    })
-                else:
-                    continue
-            except Exception:
-                conversation_history.append({
-                    'content': "Message processing error",
-                    'source': 'system',
-                    'timestamp': datetime.now().isoformat()
-                })
+        conversation_history = manager.customer_conversations.get(customer_id, [])
         has_user_messages = any(msg.get('source') == 'user' for msg in conversation_history)
         
         try:
@@ -123,8 +79,6 @@ class WebSocketHumanAgent(RoutedAgent):
                 "timestamp": datetime.now().isoformat(),
                 "task_type": "human_escalation"
             }
-            
-            # Only add initial_message if there are no user messages in conversation history
             if not has_user_messages:
                 latest_message = "Customer needs assistance"
                 if message.context:
