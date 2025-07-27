@@ -42,22 +42,22 @@ def setup_routes(app):
             
             return {
                 "ai_agents": {
-                    "triage_agent": {
-                        "name": "Triage Agent",
+                    "customer_service_triage": {
+                        "name": "Customer Service Triage",
                         "status": "active",
                         "expertise": ["Request routing", "Initial assessment", "Customer triage"]
                     },
-                    "technical_agent": {
+                    "technical_support": {
                         "name": "Technical Support",
                         "status": "active", 
                         "expertise": ["Hardware troubleshooting", "Software issues", "System configuration"]
                     },
-                    "billing_agent": {
+                    "billing_support": {
                         "name": "Billing Support",
                         "status": "active",
                         "expertise": ["Payment processing", "Subscription management", "Billing inquiries"]
                     },
-                    "sales_agent": {
+                    "sales_support": {
                         "name": "Sales Support",
                         "status": "active",
                         "expertise": ["Product information", "Sales inquiries", "Purchase assistance"]
@@ -88,31 +88,31 @@ def setup_routes(app):
     @app.get("/api/agents/types")
     async def get_agent_types():
         return {
-            "TriageAgent": {
-                "display_name": "Triage Agent",
+            "CustomerServiceTriageAgent": {
+                "display_name": "Customer Service Triage",
                 "icon": "🎯",
                 "color": "#6366F1",
                 "description": "Routes customer requests to appropriate specialists"
             },
-            "TechnicalAgent": {
+            "TechnicalSupportAgent": {
                 "display_name": "Technical Support",
                 "icon": "🔧", 
                 "color": "#3B82F6",
                 "description": "Handles technical issues and troubleshooting"
             },
-            "BillingAgent": {
+            "BillingSupportAgent": {
                 "display_name": "Billing Support",
                 "icon": "💳",
                 "color": "#10B981", 
                 "description": "Manages billing and payment inquiries"
             },
-            "SalesAgent": {
+            "SalesSupportAgent": {
                 "display_name": "Sales Support",
                 "icon": "🛒",
                 "color": "#8B5CF6",
                 "description": "Provides product information and sales assistance"
             },
-            "HumanAgent": {
+            "HumanSupportAgent": {
                 "display_name": "Human Support",
                 "icon": "👤",
                 "color": "#F59E0B",
@@ -136,7 +136,7 @@ def setup_routes(app):
     async def get_transfer_options():
         return {
             "transfer_to_triage": {
-                "display_name": "Triage Agent",
+                "display_name": "Customer Service Triage",
                 "description": "General routing and new request handling",
                 "icon": "🎯",
                 "color": "#6366F1"

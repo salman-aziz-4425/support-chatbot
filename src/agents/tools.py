@@ -2,12 +2,12 @@ from datetime import datetime
 from autogen_core.tools import FunctionTool
 
 
-triage_agent_topic_type = "TriageAgent"
-technical_agent_topic_type = "TechnicalAgent"
-billing_agent_topic_type = "BillingAgent"
-sales_agent_topic_type = "SalesAgent"
-human_agent_topic_type = "HumanAgent"
-user_topic_type = "User"
+triage_agent_topic_type = "CustomerServiceTriageAgent"
+technical_agent_topic_type = "TechnicalSupportAgent"
+billing_agent_topic_type = "BillingSupportAgent"
+sales_agent_topic_type = "SalesSupportAgent"
+human_agent_topic_type = "HumanSupportAgent"
+user_topic_type = "CustomerUser"
 
 
 def transfer_to_technical() -> str:

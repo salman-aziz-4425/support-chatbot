@@ -35,7 +35,7 @@ autogen-project/
 │   ├── agent_dashboard.html         # Human agent dashboard
 │   ├── style.css                    # Stylesheets
 │   └── script.js                    # Frontend JavaScript
-└── templates/                       # Template files (if needed)
+└── autogen_env/                     # Virtual environment
 ```
 
 ## 🚀 Quick Start
@@ -59,13 +59,13 @@ autogen-project/
 ### **Core Components**
 
 #### **🤖 AI Agents**
-- **TriageAgent**: Routes customer requests to appropriate specialists
-- **TechnicalAgent**: Handles hardware/software issues
-- **BillingAgent**: Manages payment and subscription issues
-- **SalesAgent**: Provides product information and sales assistance
+- **CustomerServiceTriageAgent**: Routes customer requests to appropriate specialists
+- **TechnicalSupportAgent**: Handles hardware/software issues
+- **BillingSupportAgent**: Manages payment and subscription issues
+- **SalesSupportAgent**: Provides product information and sales assistance
 
 #### **👨‍💼 Human Agents**
-- **WebSocketHumanAgent**: Manages human agent interactions
+- **HumanSupportAgent**: Manages human agent interactions
 - **ConnectionManager**: Tracks active connections and assignments
 
 #### **🔄 Transfer System**
@@ -87,6 +87,7 @@ Human Agent → WebSocket → Agent Runtime → Customer
 - **No multiple connections** - Clean connection handling
 - **Proper transfers** - AI ↔ Human ↔ AI all work
 - **Clean code** - Organized into logical modules
+- **Professional agent names** - Clear, descriptive agent identities
 
 ### 🔧 **System Capabilities**
 - **Real-time communication** via WebSockets
@@ -98,81 +99,62 @@ Human Agent → WebSocket → Agent Runtime → Customer
 ## 🎯 Usage Examples
 
 ### **Customer Journey**
-1. Customer opens chat → TriageAgent greets
-2. Customer describes issue → AI routes to appropriate specialist
-3. If complex → Escalates to human agent
-4. Human can transfer back to AI if needed
+1. Customer opens chat → CustomerServiceTriageAgent greets
+2. Customer asks technical question → Routes to TechnicalSupportAgent
+3. Customer needs billing help → Transfers to BillingSupportAgent
+4. Customer requests human → Escalates to HumanSupportAgent
+5. Human agent transfers back → Routes to appropriate AI agent
 
-### **Human Agent Workflow**
-1. Login to agent dashboard
-2. Receive customer assignments
-3. View conversation history
-4. Respond to customers
-5. Transfer to AI agents when appropriate
+### **Agent Responsibilities**
 
-## 🔧 API Endpoints
+#### **CustomerServiceTriageAgent** 🎯
+- Initial customer greeting and assessment
+- Intelligent routing to specialized agents
+- Handling transfers from human agents
+- General customer service inquiries
 
-### **REST APIs**
-- `GET /` - Customer chat interface
-- `GET /agent-dashboard` - Human agent dashboard
-- `POST /api/agent/login` - Agent authentication
-- `GET /api/system/status` - System status
-- `GET /api/agents/types` - Agent information
-- `GET /api/human/transfer-options` - Transfer options
+#### **TechnicalSupportAgent** 🔧
+- Hardware and software troubleshooting
+- System configuration assistance
+- Network and connectivity issues
+- Technical documentation and guides
 
-### **WebSocket Endpoints**
-- `ws://localhost:8000/ws/chat` - Customer chat
-- `ws://localhost:8000/ws/agent/{agent_id}` - Human agent
+#### **BillingSupportAgent** 💳
+- Payment processing and verification
+- Subscription management
+- Refund and billing inquiries
+- Account billing questions
 
-## 🛠️ Development
+#### **SalesSupportAgent** 🛒
+- Product information and features
+- Pricing and package details
+- Purchase assistance
+- Sales inquiries and quotes
 
-### **Adding New Agents**
-1. Add agent type to `src/agents/tools.py`
-2. Create agent class in `src/agents/ai_agent.py`
-3. Register in `src/services/agent_runtime.py`
+#### **HumanSupportAgent** 👤
+- Complex issue resolution
+- Customer complaints and escalations
+- Account-specific assistance
+- Personalized customer service
 
-### **Adding New Tools**
-1. Define function in `src/agents/tools.py`
-2. Create FunctionTool instance
-3. Add to agent's tools list
+## 🔧 Technical Details
 
-### **Modifying Transfers**
-1. Update delegate tools in `src/agents/tools.py`
-2. Modify transfer logic in `src/services/transfer_service.py`
+### **Agent Communication**
+- **WebSocket-based** real-time messaging
+- **Topic-based routing** for agent handoffs
+- **Message persistence** for conversation history
+- **Error recovery** and connection management
+
+### **Security & Performance**
+- **Connection validation** prevents duplicates
+- **Message sanitization** for safe content
+- **Graceful degradation** when agents unavailable
+- **Scalable architecture** for multiple concurrent users
 
 ## 📊 System Status
 
-Monitor system health via:
-```bash
-curl http://localhost:8000/api/system/status
-```
-
-Returns:
-```json
-{
-  "ai_agents": { "triage_agent": "active", ... },
-  "human_agents": { "total_connected": 2, "available": 1 },
-  "customers": { "total_connected": 5, "assigned_to_humans": 2 }
-}
-```
-
-## 🎉 Benefits of New Structure
-
-### **✅ Organization**
-- **Logical separation** of concerns
-- **Easy to find** specific functionality
-- **Modular design** for easy maintenance
-
-### **✅ Maintainability**
-- **Clear imports** and dependencies
-- **Isolated components** for testing
-- **Scalable architecture** for new features
-
-### **✅ Understanding**
-- **Self-documenting** folder structure
-- **Related code** grouped together
-- **Clear responsibilities** for each module
-
----
-
-**The system is now organized, maintainable, and easy to understand!** 🚀 
+Access system status at `/api/system/status` to monitor:
+- Active agent connections
+- Customer session status
+- Human agent availability
+- System performance metrics 

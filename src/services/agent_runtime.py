@@ -42,7 +42,7 @@ async def initialize_agent_runtime():
             agent_runtime,
             type=triage_agent_topic_type,
             factory=lambda: AIAgent(
-                description="A triage agent that routes customer requests to appropriate specialists.",
+                description="A customer service triage agent that routes customer requests to appropriate specialists.",
                 system_message=SystemMessage(
                     content="You are a customer service triage agent. "
                     "You handle initial customer requests and conversations transferred back from human agents. "
@@ -75,7 +75,7 @@ async def initialize_agent_runtime():
             agent_runtime,
             type=technical_agent_topic_type,
             factory=lambda: AIAgent(
-                description="A technical support agent for hardware and software issues.",
+                description="A technical support specialist for hardware and software issues.",
                 system_message=SystemMessage(
                     content="You are a technical support specialist. "
                     "Help customers with hardware, software, network, and system issues. "
@@ -98,7 +98,7 @@ async def initialize_agent_runtime():
             agent_runtime,
             type=billing_agent_topic_type,
             factory=lambda: AIAgent(
-                description="A billing support agent for payment and subscription issues.",
+                description="A billing support specialist for payment and subscription issues.",
                 system_message=SystemMessage(
                     content="You are a billing support specialist. "
                     "Help customers with payments, subscriptions, refunds, and billing questions. "
@@ -121,9 +121,9 @@ async def initialize_agent_runtime():
             agent_runtime,
             type=sales_agent_topic_type,
             factory=lambda: AIAgent(
-                description="A sales agent for product information and purchasing.",
+                description="A sales support specialist for product information and purchasing.",
                 system_message=SystemMessage(
-                    content="You are a sales specialist. "
+                    content="You are a sales support specialist. "
                     "Help customers with product information, features, pricing, and purchasing decisions. "
                     "Be helpful and informative without being pushy. "
                     "For complex sales inquiries, you can escalate to human sales representatives."
@@ -143,7 +143,7 @@ async def initialize_agent_runtime():
             agent_runtime,
             type=human_agent_topic_type,
             factory=lambda: WebSocketHumanAgent(
-                description="A human agent proxy for WebSocket communication.",
+                description="A human support agent proxy for WebSocket communication.",
                 agent_topic_type=human_agent_topic_type,
                 user_topic_type=user_topic_type,
             ),
@@ -156,7 +156,7 @@ async def initialize_agent_runtime():
             agent_runtime,
             type=user_topic_type,
             factory=lambda: WebSocketUserAgent(
-                description="A user agent proxy for WebSocket communication.",
+                description="A customer user agent proxy for WebSocket communication.",
                 user_topic_type=user_topic_type,
                 agent_topic_type=triage_agent_topic_type,
             ),

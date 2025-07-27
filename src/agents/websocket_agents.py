@@ -13,10 +13,7 @@ from autogen_core.models import (
 from src.models.message_models import UserTask, AgentResponse, UserLogin
 from src.utils.serialization import safe_serialize_content
 from src.agents.tools import (
-    human_to_technical_tool,
-    human_to_billing_tool,
-    human_to_sales_tool,
-    human_to_triage_tool,
+    triage_agent_topic_type,
 )
 
 logger = logging.getLogger(__name__)
@@ -26,18 +23,18 @@ class WebSocketHumanAgent(RoutedAgent):
         super().__init__(description)
         self._agent_topic_type = agent_topic_type
         self._user_topic_type = user_topic_type
-        self._delegate_tools = dict([
-            (human_to_technical_tool.name, human_to_technical_tool),
-            (human_to_billing_tool.name, human_to_billing_tool),
-            (human_to_sales_tool.name, human_to_sales_tool),
-            (human_to_triage_tool.name, human_to_triage_tool),
-        ])
 
     @message_handler
     async def handle_user_task(self, message: UserTask, ctx: MessageContext) -> None:
+        """Handle human agent assignment when triage agent escalates to human"""
         from src.services.connection_manager import manager
         
         customer_id = ctx.topic_id.source
+        
+        if customer_id in manager.customer_to_agent:
+            logger.info(f"Customer {customer_id} already assigned to human agent {manager.customer_to_agent[customer_id]}")
+            return
+        
         available_agents = manager.get_available_human_agents()
         
         if not available_agents:

@@ -1,4 +1,4 @@
-// Chat Application State
+
 class ChatApp {
     constructor() {
         this.currentAgent = 'ai'; // 'ai' or 'human'
@@ -191,18 +191,6 @@ class ChatApp {
     initializeChat() {
         this.messageInput.focus();
         this.updateConnectionStatus('connected');
-        
-        // Wait for WebSocket connection before showing welcome message
-        const checkConnection = () => {
-            if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
-                setTimeout(() => {
-                    this.addBotMessage("Hi! I'm your AI support assistant. How can I help you today?", false, 'GeneralSupport');
-                }, 500);
-            } else {
-                setTimeout(checkConnection, 100);
-            }
-        };
-        checkConnection();
     }
 
     showTransferNotice() {

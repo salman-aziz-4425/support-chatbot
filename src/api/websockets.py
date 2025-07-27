@@ -17,22 +17,13 @@ def setup_websockets(app):
     @app.websocket("/ws/chat")
     async def chat(websocket: WebSocket):
         customer_id = f"customer_{datetime.now().timestamp()}"
-        
-        # Check if customer already exists to prevent duplicate connections
-        if customer_id in manager.active_customer_connections:
-            logger.warning(f"Customer {customer_id} already connected, closing duplicate")
-            await websocket.close()
+        connection_success = await manager.connect_customer(customer_id, websocket)
+        if not connection_success:
             return
-            
-        await manager.connect_customer(customer_id, websocket)
-        
-        # Initialize runtime only once
         from src.services.agent_runtime import agent_runtime as runtime
         if runtime is None:
             await initialize_agent_runtime()
             from src.services.agent_runtime import agent_runtime as runtime
-        
-        # Send initial login message only once
         try:
             await runtime.publish_message(
                 UserLogin(customer_id=customer_id),
@@ -106,15 +97,12 @@ def setup_websockets(app):
 
     @app.websocket("/ws/agent/{agent_id}")
     async def agent_websocket(websocket: WebSocket, agent_id: str):
-        # Check if agent already connected to prevent duplicates
-        if agent_id in manager.active_human_agents:
-            logger.warning(f"Agent {agent_id} already connected, closing duplicate")
-            await websocket.close()
-            return
+        # Connect human agent using improved connection manager
+        connection_success = await manager.connect_human_agent(agent_id, websocket)
+        if not connection_success:
+            return  # Connection was rejected due to duplicate
             
         try:
-            await manager.connect_human_agent(agent_id, websocket)
-            
             # Send connection confirmation only once
             await websocket.send_json({
                 "type": "connection_confirmed",
