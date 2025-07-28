@@ -54,107 +54,245 @@ autogen-project/
    - Customer Chat: http://localhost:8000
    - Agent Dashboard: http://localhost:8000/agent-dashboard
 
-## 🏗️ Architecture Overview
+## 🏗️ System Architecture
 
-### **Core Components**
+```mermaid
+graph TB
+    %% Client Layer
+    subgraph "Client Layer"
+        Customer["👤 Customer WebApp"]
+        Agent["👨‍💼 Human Agent Dashboard"]
+    end
 
-#### **🤖 AI Agents**
-- **CustomerServiceTriageAgent**: Routes customer requests to appropriate specialists
-- **TechnicalSupportAgent**: Handles hardware/software issues
-- **BillingSupportAgent**: Manages payment and subscription issues
-- **SalesSupportAgent**: Provides product information and sales assistance
+    %% API & WebSocket Layer
+    subgraph "Communication Layer"
+        API["🌐 FastAPI Routes"]
+        WS_Customer["🔗 Customer WebSocket"]
+        WS_Agent["🔗 Agent WebSocket"]
+    end
 
-#### **👨‍💼 Human Agents**
-- **HumanSupportAgent**: Manages human agent interactions
-- **ConnectionManager**: Tracks active connections and assignments
+    %% Core Agent Runtime
+    subgraph "AutoGen Agent Runtime"
+        Runtime["⚡ SingleThreadedAgentRuntime"]
+        
+        subgraph "AI Agents"
+            Triage["🎯 Triage Agent"]
+            Technical["🔧 Technical Agent"]
+            Billing["💳 Billing Agent"]
+            Sales["🛒 Sales Agent"]
+        end
+        
+        subgraph "WebSocket Agents"
+            WSHuman["👤 WebSocket Human Agent"]
+            WSUser["📱 WebSocket User Agent"]
+        end
+    end
 
-#### **🔄 Transfer System**
-- **AI → AI**: Seamless handoffs between specialized agents
-- **AI → Human**: Escalation for complex issues
-- **Human → AI**: Transfer back to AI for routine tasks
+    %% Tools & Services
+    subgraph "Tools & Services"
+        RegularTools["🛠️ Regular Tools"]
+        TransferTools["🔄 Transfer Tools"]
+    end
 
-### **Message Flow**
+    %% Data & State Management
+    subgraph "Services Layer"
+        ConnMgr["📊 Connection Manager"]
+        TransferSvc["🔀 Transfer Service"]
+        LLM["🤖 Ollama LLM Client"]
+    end
 
+    %% Message Flow
+    Customer --> WS_Customer
+    Agent --> WS_Agent
+    Agent --> API
+    
+    WS_Customer --> WSUser
+    WS_Agent --> WSHuman
+    API --> ConnMgr
+    
+    WSUser --> Runtime
+    WSHuman --> Runtime
+    
+    Runtime --> Triage
+    Runtime --> Technical
+    Runtime --> Billing
+    Runtime --> Sales
+    
+    Triage -.->|transfer_to_technical| Technical
+    Triage -.->|transfer_to_billing| Billing
+    Triage -.->|transfer_to_sales| Sales
+    Triage -.->|escalate_to_human| WSHuman
+    
+    Technical -.->|transfer_back| Triage
+    Billing -.->|transfer_back| Triage
+    Sales -.->|transfer_back| Triage
+    
+    Technical --> RegularTools
+    Billing --> RegularTools
+    Sales --> RegularTools
+    
+    Triage --> TransferTools
+    Technical --> TransferTools
+    Billing --> TransferTools
+    Sales --> TransferTools
+    
+    Runtime --> LLM
+    Runtime --> ConnMgr
+    WSHuman --> TransferSvc
+    
+    %% Response Flow
+    WSUser --> WS_Customer
+    WSHuman --> WS_Agent
+    
+    %% Styling
+    classDef clientLayer fill:#3498db,stroke:#2980b9,stroke-width:2px,color:#fff
+    classDef commLayer fill:#e74c3c,stroke:#c0392b,stroke-width:2px,color:#fff
+    classDef agentLayer fill:#f39c12,stroke:#d68910,stroke-width:2px,color:#fff
+    classDef serviceLayer fill:#27ae60,stroke:#229954,stroke-width:2px,color:#fff
+    classDef aiAgent fill:#9b59b6,stroke:#8e44ad,stroke-width:2px,color:#fff
+    classDef wsAgent fill:#1abc9c,stroke:#16a085,stroke-width:2px,color:#fff
+    
+    class Customer,Agent clientLayer
+    class API,WS_Customer,WS_Agent commLayer
+    class Runtime agentLayer
+    class Triage,Technical,Billing,Sales aiAgent
+    class WSHuman,WSUser wsAgent
+    class ConnMgr,TransferSvc,LLM,RegularTools,TransferTools serviceLayer
 ```
-Customer → WebSocket → Agent Runtime → AI Agent → Response → Customer
-Human Agent → WebSocket → Agent Runtime → Customer
+
+### Component Details
+
+**🎯 Triage Agent**
+- Routes customer requests to appropriate specialists
+- Tools: Account lookup, transfer functions
+- Handles initial customer contact and request routing
+
+**🔧 Technical Support Agent** 
+- Hardware, software, and system troubleshooting
+- Tools: Ticket creation, system status checks
+- Provides step-by-step solutions and escalation handling
+
+**💳 Billing Support Agent**
+- Payment, subscription, and billing inquiries  
+- Tools: Account lookup, ticket creation
+- Handles payment guidance and refund assistance
+
+**🛒 Sales Support Agent**
+- Product information and purchase assistance
+- Tools: Account lookup
+- Provides feature explanations and pricing information
+
+**👤 Human Support Agent**
+- Complex issue resolution and escalation handling
+- Full system override with AI agent transfer capabilities
+- Dedicated dashboard with real-time customer assignment
+
+## Key Components
+
+### 🎯 **Triage Agent**
+- **Role**: Initial customer contact and request routing
+- **Tools**: Account lookup, transfer functions
+- **System Message**: Routes customers to appropriate specialists
+- **Transfers To**: Technical, Billing, Sales, or Human agents
+
+### 🔧 **Technical Support Agent**
+- **Role**: Hardware, software, and system troubleshooting
+- **Tools**: Ticket creation, system status checks
+- **Capabilities**: Step-by-step solutions, escalation handling
+- **Transfers**: Back to triage or human escalation
+
+### 💳 **Billing Support Agent**
+- **Role**: Payment, subscription, and billing inquiries
+- **Tools**: Account lookup, ticket creation
+- **Capabilities**: Payment guidance, refund assistance
+- **Security**: Recommends human verification for sensitive data
+
+### 🛒 **Sales Support Agent**
+- **Role**: Product information and purchase assistance
+- **Tools**: Account lookup
+- **Capabilities**: Feature explanations, pricing information
+- **Approach**: Helpful without being pushy
+
+### 👤 **Human Support Agent**
+- **Role**: Complex issue resolution and escalation handling
+- **Capabilities**: Full system override, AI agent transfers
+- **Tools**: Transfer back to any AI agent with context
+- **Interface**: Dedicated dashboard with real-time customer assignment
+
+## Message Flow Architecture
+
+### Customer to AI Flow
+```
+Customer Input → WebSocket → Context Building → Triage Agent → LLM Processing → Tool/Transfer Decision → Response/Transfer
 ```
 
-## 📋 Key Features
+### AI Agent Processing
+```mermaid
+sequenceDiagram
+    participant C as Customer
+    participant WS as WebSocket
+    participant T as Triage Agent
+    participant TA as Technical Agent
+    participant LLM as Ollama LLM
 
-### ✅ **Fixed Issues**
-- **No duplicate messages** - Human agent messages sent once
-- **No multiple connections** - Clean connection handling
-- **Proper transfers** - AI ↔ Human ↔ AI all work
-- **Clean code** - Organized into logical modules
-- **Professional agent names** - Clear, descriptive agent identities
+    C->>WS: "My laptop won't boot"
+    WS->>T: UserTask with context
+    T->>LLM: Process with system message + tools
+    LLM->>T: transfer_to_technical()
+    T->>TA: UserTask with transfer context
+    TA->>LLM: Process technical issue
+    LLM->>TA: create_support_ticket()
+    TA->>TA: Execute tool
+    TA->>LLM: Get response with ticket info
+    LLM->>TA: Final response
+    TA->>WS: AgentResponse
+    WS->>C: Technical solution + ticket ID
+```
 
-### 🔧 **System Capabilities**
-- **Real-time communication** via WebSockets
-- **Multi-agent routing** with intelligent handoffs
-- **Human agent dashboard** with transfer controls
-- **Conversation history** preservation
-- **Error handling** and graceful fallbacks
+### Human Escalation Flow
+```mermaid
+sequenceDiagram
+    participant C as Customer
+    participant AI as AI Agent
+    participant H as Human Agent
+    participant M as Connection Manager
 
-## 🎯 Usage Examples
+    C->>AI: Complex request
+    AI->>AI: escalate_to_human()
+    AI->>M: Check available agents
+    M->>H: Assign customer + context
+    H->>C: Direct communication
+    H->>AI: transfer_to_technical()
+    AI->>C: Continues with context
+```
 
-### **Customer Journey**
-1. Customer opens chat → CustomerServiceTriageAgent greets
-2. Customer asks technical question → Routes to TechnicalSupportAgent
-3. Customer needs billing help → Transfers to BillingSupportAgent
-4. Customer requests human → Escalates to HumanSupportAgent
-5. Human agent transfers back → Routes to appropriate AI agent
+## Technology Stack
 
-### **Agent Responsibilities**
+- **Framework**: Microsoft AutoGen Core
+- **LLM**: Ollama (llama3.1:latest)
+- **Backend**: FastAPI + WebSockets
+- **State Management**: In-memory with Connection Manager
+- **Agent Types**: RoutedAgent with message handlers
+- **Tools**: Function-based with JSON schema
+- **Communication**: Real-time bidirectional WebSocket
 
-#### **CustomerServiceTriageAgent** 🎯
-- Initial customer greeting and assessment
-- Intelligent routing to specialized agents
-- Handling transfers from human agents
-- General customer service inquiries
+## Key Features
 
-#### **TechnicalSupportAgent** 🔧
-- Hardware and software troubleshooting
-- System configuration assistance
-- Network and connectivity issues
-- Technical documentation and guides
+- ✅ **Intelligent Routing**: Context-aware customer request routing
+- ✅ **Stateful Conversations**: Full context preservation across transfers
+- ✅ **Seamless Escalation**: Human agents can take over any conversation
+- ✅ **Bidirectional Transfers**: Humans can transfer back to AI specialists
+- ✅ **Real-time Communication**: WebSocket-based instant messaging
+- ✅ **Agent Specialization**: Domain-specific tools and prompts
+- ✅ **Error Handling**: Graceful degradation and retry mechanisms
+- ✅ **Monitoring Dashboard**: Real-time system status and agent availability
 
-#### **BillingSupportAgent** 💳
-- Payment processing and verification
-- Subscription management
-- Refund and billing inquiries
-- Account billing questions
+## Agent Capabilities Matrix
 
-#### **SalesSupportAgent** 🛒
-- Product information and features
-- Pricing and package details
-- Purchase assistance
-- Sales inquiries and quotes
-
-#### **HumanSupportAgent** 👤
-- Complex issue resolution
-- Customer complaints and escalations
-- Account-specific assistance
-- Personalized customer service
-
-## 🔧 Technical Details
-
-### **Agent Communication**
-- **WebSocket-based** real-time messaging
-- **Topic-based routing** for agent handoffs
-- **Message persistence** for conversation history
-- **Error recovery** and connection management
-
-### **Security & Performance**
-- **Connection validation** prevents duplicates
-- **Message sanitization** for safe content
-- **Graceful degradation** when agents unavailable
-- **Scalable architecture** for multiple concurrent users
-
-## 📊 System Status
-
-Access system status at `/api/system/status` to monitor:
-- Active agent connections
-- Customer session status
-- Human agent availability
-- System performance metrics 
+| Agent Type | Account Lookup | Ticket Creation | Status Check | Transfer | Human Escalation |
+|------------|---------------|----------------|--------------|----------|------------------|
+| Triage     | ✅            | ❌             | ❌           | ✅       | ✅               |
+| Technical  | ❌            | ✅             | ✅           | ✅       | ✅               |
+| Billing    | ✅            | ✅             | ❌           | ✅       | ✅               |
+| Sales      | ✅            | ❌             | ❌           | ✅       | ✅               |
+| Human      | ✅            | ✅             | ✅           | ✅       | N/A              |
